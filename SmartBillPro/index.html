@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartBillPro - Billing System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SmartBillPro</h1>
+            <p class="subtitle">Simple Billing System</p>
+        </header>
+
+        <!-- Two Column Layout -->
+        <div class="main-layout">
+            <!-- Left Column: Product Catalog and Cart (60%) -->
+            <div class="left-column">
+                <!-- Product Catalog Section -->
+                <div class="catalog-section">
+                    <div class="catalog-header">
+                        <h2>Product Catalog</h2>
+                        <button class="btn btn-primary" id="editCatalogBtn">Edit Catalog</button>
+                    </div>
+                    
+                    <!-- Catalog Search Bar -->
+                    <div class="search-section">
+                        <input type="text" id="catalogSearchInput" placeholder="Search by name or ID...">
+                    </div>
+                    
+                    <!-- Catalog List -->
+                    <div class="catalog-list-wrapper">
+                        <div class="catalog-list" id="catalogList">
+                            <!-- Catalog items will be dynamically added here -->
+                        </div>
+                        <div id="noCatalogMessage" class="no-products">No products found in catalog.</div>
+                    </div>
+                </div>
+
+                <!-- Search/Filter Bar for Cart -->
+                <div class="search-section">
+                    <input type="text" id="searchInput" placeholder="Search cart items by name...">
+                </div>
+
+                <!-- Products Table -->
+                <div class="table-section">
+                    <h2>Invoice Items</h2>
+                    <div class="table-wrapper">
+                        <table id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                    <th id="actionHeader">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                <!-- Products will be dynamically added here -->
+                            </tbody>
+                        </table>
+                        <div id="noProductsMessage" class="no-products">No products added yet.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Invoice Controls (40%) -->
+            <div class="right-column">
+                <!-- Totals Section -->
+                <div class="totals-section">
+                    <div class="total-item">
+                        <span class="total-label">Subtotal:</span>
+                        <span class="total-value-container">
+                            <span class="total-value" id="subtotal">₹0.00</span>
+                        </span>
+                    </div>
+                    <div class="total-item">
+                        <label for="discountRate" class="total-label">Discount (%):</label>
+                        <div class="total-input-value-group">
+                            <input type="number" id="discountRate" min="0" max="100" step="0.01" value="0" class="total-input">
+                            <span class="total-value-container">
+                                <span class="total-value discount-amount-display" id="discountAmount">₹0.00</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="total-item">
+                        <span class="total-label">After Discount:</span>
+                        <span class="total-value-container">
+                            <span class="total-value" id="discountedTotal">₹0.00</span>
+                        </span>
+                    </div>
+                    <div class="total-item">
+                        <label for="taxRate" class="total-label">Tax Rate (%):</label>
+                        <div class="total-input-value-group">
+                            <input type="number" id="taxRate" min="0" max="100" step="0.01" value="18" class="total-input">
+                            <span class="total-value-container">
+                                <span class="total-value tax-amount-display" id="taxAmount">₹0.00</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="total-item total-final">
+                        <span class="total-label">Total:</span>
+                        <span class="total-value-container">
+                            <span class="total-value" id="finalTotal">₹0.00</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Invoice Actions -->
+                <div class="invoice-actions">
+                    <button class="btn btn-primary" id="printInvoiceBtn">Print Invoice</button>
+                    <button class="btn btn-danger" id="clearBillBtn">Clear Bill</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Header (visible only in print view) -->
+        <div class="invoice-header-print">
+            <h1 class="invoice-store-name">SmartBill Pro</h1>
+            <p class="invoice-date" id="invoiceDate"></p>
+        </div>
+    </div>
+
+    <!-- Catalog Edit Modal -->
+    <div id="catalogEditModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Product Catalog</h2>
+                <button class="modal-close" id="closeCatalogModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-actions-top">
+                    <button class="btn btn-primary" id="addNewCatalogItemBtn">Add New Product</button>
+                </div>
+                <div class="catalog-edit-list" id="catalogEditList">
+                    <!-- Editable catalog items will be rendered here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveCatalogBtn">Save Catalog</button>
+                <button class="btn btn-danger" id="cancelCatalogEditBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Product Form (inside modal) -->
+    <div id="addProductFormModal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Add New Product</h2>
+                <button class="modal-close" id="closeAddProductModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="newProductForm">
+                    <div class="form-group">
+                        <label for="newProductId">Product ID:</label>
+                        <input type="text" id="newProductId" required placeholder="e.g., PROD-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductName">Product Name:</label>
+                        <input type="text" id="newProductName" required placeholder="Enter product name">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newProductPrice">Price (₹):</label>
+                            <input type="number" id="newProductPrice" min="0" step="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="newProductStock">Stock:</label>
+                            <input type="number" id="newProductStock" min="0" value="0" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveNewProductBtn">Add Product</button>
+                <button class="btn btn-danger" id="cancelNewProductBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
